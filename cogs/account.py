@@ -145,12 +145,11 @@ class AccountCog(commands.Cog):
         embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
         embed.set_author(name="Balance", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         embed.description = "**Available:**\n"
-        embed.description += f"```{str(Env.raw_to_amount(balance_raw - pending_send_db))} {Env.currency_symbol()}```\n"
-        embed.description += "**Pending:**\n"
-        pending_receive_str = f"{str(Env.raw_to_amount(pending_raw + pending_receive_db))} {Env.currency_symbol()}"
-        pending_send_str = f"{str(Env.raw_to_amount(pending_send_db))} {Env.currency_symbol()}"
+        embed.description += f"```{Env.raw_to_amount(balance_raw - pending_send_db):,} {Env.currency_symbol()}\n"
+        pending_receive_str = f" + {Env.raw_to_amount(pending_raw + pending_receive_db):,} {Env.currency_symbol()}"
+        pending_send_str = f" - {Env.raw_to_amount(pending_send_db):,} {Env.currency_symbol()}"
         rjust_size = max(len(pending_send_str), len(pending_receive_str))
-        embed.description += f"```{pending_receive_str.ljust(rjust_size)} (Pending Receipt)\n{pending_send_str.ljust(rjust_size)} (Pending Send)```\n"
+        embed.description += f"{pending_receive_str.ljust(rjust_size)} (Pending Receipt)\n{pending_send_str.ljust(rjust_size)} (Pending Send)```\n"
         embed.set_footer(text="Pending balances are in queue and will become available after processing.")
         return embed
 
@@ -228,6 +227,12 @@ class AccountCog(commands.Cog):
         user: User = ctx.user
         send_amount: float = ctx.send_amount
         destination: str = ctx.destination
+
+        available_balance = Env.raw_to_amount(await user.get_available_balance())
+        if send_amount > available_balance:
+            await Messages.add_x_reaction(msg)
+            await Messages.send_error_dm(msg.author, f"Your balance isn't high enough to complete this transaction. You have **{available_balance} {Env.currency_symbol()}**, but this would cost you **{send_amount} {Env.currency_symbol()}**")
+            return
 
         # Create transaction
         tx = await Transaction.create_transaction_external(

@@ -33,7 +33,7 @@ class SpyCog(commands.Cog):
         # Get mentioned users
         for m in msg.mentions:
             targets.append(m.id)
-    
+
         # Get users they are spying on by ID alone
         for sec in msg.content.split():
             try:
@@ -59,7 +59,10 @@ class SpyCog(commands.Cog):
         for u in user_list:
             response = f"Last known name: {u.name}```{u.id}```"
             response += f"```{u.account.address}```"
-            response += f"https://creeper.banano.cc/explorer/account/{u.account.address}\n"
+            if Env.banano():
+                response += f"https://creeper.banano.cc/explorer/account/{u.account.address}\n"
+            else:
+                response += f"https://nanocrawler.cc/explorer/account/{u.account.address}\n"
 
         embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
         embed.set_author(name="WFU Result", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
@@ -77,7 +80,7 @@ class SpyCog(commands.Cog):
             await Messages.add_x_reaction(msg)
             await Messages.send_error_dm(msg.author, "No valid addresses in your ufw command")
             return
-    
+
         address_list = await Account.filter(address__in=addresses).prefetch_related('user').all()
         if len(address_list) < 1:
             await Messages.add_x_reaction(msg)
@@ -87,7 +90,10 @@ class SpyCog(commands.Cog):
         for acct in address_list:
             response = f"Last known name: {acct.user.name}```{acct.user.id}```"
             response += f"```{acct.address}```"
-            response += f"https://creeper.banano.cc/explorer/account/{acct.address}\n"
+            if Env.banano():
+                response += f"https://creeper.banano.cc/explorer/account/{acct.address}\n"
+            else:
+                response += f"https://nanocrawler.cc/explorer/account/{acct.address}\n"
 
         embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
         embed.set_author(name="UFW Result", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")

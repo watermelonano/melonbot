@@ -81,7 +81,9 @@ ADMIN_COMMANDS = {
             admin.TIPBANNED_INFO,
             admin.STATSBAN_INFO,
             admin.STATSUNBAN_INFO,
-            admin.STATSBANNED_INFO
+            admin.STATSBANNED_INFO,
+            admin.DECREASETIPS_INFO,
+            admin.INCREASETIPS_INFO
         ]
     }
 }
@@ -148,7 +150,7 @@ class HelpCog(commands.Cog):
         description+= f"\nMy Discord: **@bbedward#9246**"
         description+= f"\nMy Reddit: **/u/bbedward**"
         description+= f"\nMy Twitter: **@theRealBbedward**"
-        description+= f"\n\nGraham GitHub: https://github.com/bbedward/Graham_Nano_Tip_Bot"
+        description+= f"\n\nGraham GitHub: https://github.com/bbedward/graham_discord_bot"
         pages.append(Page(entries=entries, author=author,description=description))
         return pages
 

@@ -1,5 +1,5 @@
 discord.py==1.2.5
-tortoise-orm==0.15.3
+tortoise-orm==0.15.4
 aiosqlite==0.10.0
 asyncpg==0.20.0
 bitstring==3.1.6
@@ -10,6 +10,7 @@ emoji==0.5.4
 pyyaml==5.1.2
 aioredis-lock==0.0.3
 python-dotenv==0.10.3
+python-rapidjson==0.9.1
 #For migrating from v3
 # peewee
 # psycopg2
