@@ -1,8 +1,8 @@
 import aiohttp
-import json
+import rapidjson as json
 import socket
 from config import Config
-from typing import List
+from typing import List, Tuple
 
 class RPCClient(object):
     _instance = None
@@ -19,9 +19,8 @@ class RPCClient(object):
             cls.wallet_id = Config.instance().wallet
             cls.ipv6 = '::' in cls.node_url
             cls.connector = aiohttp.TCPConnector(family=socket.AF_INET6 if cls.ipv6 else socket.AF_INET,resolver=aiohttp.AsyncResolver())
-            cls.session = aiohttp.ClientSession(connector=cls.connector)
+            cls.session = aiohttp.ClientSession(connector=cls.connector, json_serialize=json.dumps)
         return cls._instance
-
 
     @classmethod
     async def close(cls):
@@ -116,3 +115,13 @@ class RPCClient(object):
         if 'block' in respjson:
             return respjson['block']
         return None
+
+    async def block_count(self) -> Tuple[int, int]:
+        "Returns block_count from the node as a tuple count, unchecked"
+        count_action = {
+            "action": "block_count"
+        }
+        respjson = await self.make_request(count_action)
+        if 'count' in respjson and 'unchecked' in respjson:
+            return int(respjson['count']), int(respjson['unchecked'])
+        return None, None

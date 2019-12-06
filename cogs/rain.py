@@ -9,7 +9,7 @@ from util.env import Env
 import asyncio
 import config
 import datetime
-import json
+import rapidjson as json
 import logging
 from util.regex import AmountAmbiguousException, AmountMissingException, RegexUtil
 from util.validators import Validators
@@ -41,7 +41,7 @@ class RainCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         # Update active
-        if not ChannelUtil.is_private(message.channel):
+        if not ChannelUtil.is_private(message.channel) and len(message.content) > 0 and message.content[0] not in ['`', '\'', '.', '?', '!', "\"", "+", ";", ":", ","]:
             await self.update_activity_stats(message)
 
     async def cog_before_invoke(self, ctx: Context):
@@ -77,31 +77,37 @@ class RainCog(commands.Cog):
         try:
             ctx.send_amount = RegexUtil.find_send_amounts(msg.content)
             if Validators.too_many_decimals(ctx.send_amount):
+                await Messages.add_x_reaction(msg)
                 await Messages.send_error_dm(msg.author, f"You are only allowed to use {Env.precision_digits()} digits after the decimal.")
                 ctx.error = True
                 return
             elif ctx.send_amount < config.Config.instance().get_rain_minimum():
                 ctx.error = True
+                await Messages.add_x_reaction(msg)
                 await Messages.send_usage_dm(msg.author, RAIN_INFO)
                 return
             # See if user exists in DB
             user = await User.get_user(msg.author)
             if user is None:
+                await Messages.add_x_reaction(msg)
                 await Messages.send_error_dm(msg.author, f"You should create an account with me first, send me `{config.Config.instance().command_prefix}help` to get started.")
                 ctx.error = True
                 return
             elif user.frozen:
                 ctx.error = True
+                await Messages.add_x_reaction(msg)
                 await Messages.send_error_dm(msg.author, f"Your account is frozen. Contact an admin if you need further assistance.")
                 return
             # Update name, if applicable
             await user.update_name(msg.author.name)
             ctx.user = user
         except AmountMissingException:
+            await Messages.add_x_reaction(msg)
             await Messages.send_usage_dm(msg.author, RAIN_INFO)
             ctx.error = True
             return
         except AmountAmbiguousException:
+            await Messages.add_x_reaction(msg)
             await Messages.send_error_dm(msg.author, "You can only specify 1 amount to send")
             ctx.error = True
             return
@@ -126,7 +132,7 @@ class RainCog(commands.Cog):
             return
 
         individual_send_amount = NumberUtil.truncate_digits(send_amount / len(active_users), max_digits=Env.precision_digits())
-        if individual_send_amount < 0.01:
+        if individual_send_amount < Constants.TIP_MINIMUM:
             await Messages.add_x_reaction(msg)
             await Messages.send_error_dm(msg.author, f"Amount is too small to divide across {len(active_users)} users")
             return
@@ -177,9 +183,44 @@ class RainCog(commands.Cog):
         await RedisDB.instance().set(f"rainspam{msg.author.id}", "as", expires=300)
         # Update stats
         stats: Stats = await user.get_stats(server_id=msg.guild.id)
-        await stats.update_tip_stats(amount_needed)
+        if msg.channel.id not in config.Config.instance().get_no_stats_channels():
+            await stats.update_tip_stats(amount_needed)
         # DM creator
-        await Messages.send_success_dm(msg.author, f"You rained **{amount_needed} {Env.currency_symbol()}** to **{len(tx_list)} users**, they received **{individual_send_amount} {Env.currency_symbol()}** each.", header="Make it Rain")
+        await Messages.send_success_dm(msg.author, f"You rained **{amount_needed} {Env.currency_symbol()}** to **{len(tx_list)} users**, they received **{NumberUtil.truncate_digits(individual_send_amount, max_digits=Env.precision_digits())} {Env.currency_symbol()}** each.", header="Make it Rain")
+        # Make the rainer auto-rain eligible
+        await self.auto_rain_eligible(msg)
+
+    @staticmethod
+    async def auto_rain_eligible(msg: discord.Message):
+        # Ignore if user doesnt have rain role
+        has_rain_role = False
+        rain_roles = config.Config.instance().get_rain_roles()
+        if len(rain_roles) > 0:
+            for role in msg.author.roles:
+                if role.id in rain_roles:
+                    has_rain_role = True
+                    break
+            if not has_rain_role:
+                return
+
+        # Get user OBJ from redis if it exists, else create one
+        user_key = f"activity:{msg.guild.id}:{msg.author.id}"
+        active_stats = await RedisDB.instance().get(user_key)
+        if active_stats is None:
+            # Create stats and save
+            active_stats = {
+                'user_id': msg.author.id,
+                'last_msg': datetime.datetime.utcnow().strftime('%m/%d/%Y %H:%M:%S'),
+                'msg_count': Constants.RAIN_MSG_REQUIREMENT * 2
+            }
+            await RedisDB.instance().set(user_key, json.dumps(active_stats), expires=1800)
+            return
+        else:
+            active_stats = json.loads(active_stats)
+            if active_stats['msg_count'] < Constants.RAIN_MSG_REQUIREMENT * 2:
+                active_stats['msg_count'] = Constants.RAIN_MSG_REQUIREMENT * 2
+            active_stats['last_msg'] = datetime.datetime.utcnow().strftime('%m/%d/%Y %H:%M:%S')
+            await RedisDB.instance().set(user_key, json.dumps(active_stats), expires=1800)
 
     @staticmethod
     async def update_activity_stats(msg: discord.Message):
@@ -220,17 +261,24 @@ class RainCog(commands.Cog):
 
         # Ignore em if they've messaged too recently
         last_msg_dt = datetime.datetime.strptime(active_stats['last_msg'], '%m/%d/%Y %H:%M:%S')
-        if last_msg_dt <= datetime.datetime.utcnow() - datetime.timedelta(minutes=2):
+        delta_s = (datetime.datetime.utcnow() - last_msg_dt).total_seconds()
+        if 90 > delta_s:
             return
-        elif last_msg_dt > datetime.datetime.utcnow() - datetime.timedelta(minutes=15):
+        elif delta_s > 1200:
             # Deduct a point
             if active_stats['msg_count'] > 1:
                 active_stats['msg_count'] -= 1
-                await RedisDB.instance().set(user_key, json.dumps(active_stats), expires=1800)
+            active_stats['last_msg'] = datetime.datetime.utcnow().strftime('%m/%d/%Y %H:%M:%S')
+            await RedisDB.instance().set(user_key, json.dumps(active_stats), expires=1800)
         else:
             # add a point
             if active_stats['msg_count'] <= Constants.RAIN_MSG_REQUIREMENT * 2:
                 active_stats['msg_count'] += 1
+                active_stats['last_msg'] = datetime.datetime.utcnow().strftime('%m/%d/%Y %H:%M:%S')
+                await RedisDB.instance().set(user_key, json.dumps(active_stats), expires=1800)
+            else:
+                # Reset key expiry
+                active_stats['last_msg'] = datetime.datetime.utcnow().strftime('%m/%d/%Y %H:%M:%S')
                 await RedisDB.instance().set(user_key, json.dumps(active_stats), expires=1800)
 
     @staticmethod
@@ -256,6 +304,9 @@ class RainCog(commands.Cog):
                 continue
             elif u['msg_count'] >= Constants.RAIN_MSG_REQUIREMENT:
                 users_filtered.append(u['user_id'])
+
+        if len(users_filtered) < 1:
+            return []
 
         # Get only users in our database
         return await User.filter(id__in=users_filtered, frozen=False, tip_banned=False).prefetch_related('account').all()
