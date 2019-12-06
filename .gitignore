@@ -106,7 +106,7 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# NANO tip bot stuff
+# WATERMELONANO tip bot stuff
 nanotipbot.db
 settings.py
 nohup.out

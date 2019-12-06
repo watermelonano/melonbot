@@ -144,8 +144,8 @@ class StatsCog(commands.Cog):
             banned=False
         ).order_by('-top_tip_day').prefetch_related('user').limit(1).first()
 
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name='Biggest Tips', icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name='Biggest Tips', icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         new_line = '\n' # Can't use this directly inside f-expression, so store it in a variable
         if top_tip_day is not None:
             embed.description = f"**Last 24 Hours**\n```{NumberUtil.format_float(top_tip_day.top_tip_day)} {Env.currency_symbol()} - by {top_tip_day.user.name}```"
@@ -192,8 +192,8 @@ class StatsCog(commands.Cog):
             response_msg += f"{adj_rank}. {amount_str.ljust(biggest_num)} - by {user_name}\n" 
         response_msg += "```"
 
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name=f"Here are the top {len(ballers)} tippers \U0001F44F", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name=f"Here are the top {len(ballers)} tippers \U0001F44F", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         embed.description = response_msg
         embed.set_footer(text=f"Use {config.Config.instance().command_prefix} legacyboard for all-time stats")
 
@@ -238,8 +238,8 @@ class StatsCog(commands.Cog):
             response_msg += f"{adj_rank}. {amount_str.ljust(biggest_num)} - by {user_name}\n" 
         response_msg += "```"
 
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name=f"Here are the top {len(ballers)} tippers of all time\U0001F44F", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name=f"Here are the top {len(ballers)} tippers of all time\U0001F44F", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         embed.description = response_msg
 
         await RedisDB.instance().set(f"ballerspam{msg.channel.id}", "as", expires=300)

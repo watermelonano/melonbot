@@ -34,7 +34,7 @@ class RegexUtil():
         if Env.banano():
             address_regex = '(?:ban)(?:_)(?:1|3)(?:[13456789abcdefghijkmnopqrstuwxyz]{59})'
         else:
-            address_regex = '(?:nano|xrb)(?:_)(?:1|3)(?:[13456789abcdefghijkmnopqrstuwxyz]{59})'
+            address_regex = '(?:watermelon)(?:1|3)(?:[13456789abcdefghijkmnopqrstuwxyz]{59})'
         matches = re.findall(address_regex, input_text)
         if len(matches) == 1:
             return matches[0]
@@ -48,7 +48,7 @@ class RegexUtil():
         if Env.banano():
             address_regex = '(?:ban)(?:_)(?:1|3)(?:[13456789abcdefghijkmnopqrstuwxyz]{59})'
         else:
-            address_regex = '(?:nano|xrb)(?:_)(?:1|3)(?:[13456789abcdefghijkmnopqrstuwxyz]{59})'
+            address_regex = '(?:watermelon)(?:1|3)(?:[13456789abcdefghijkmnopqrstuwxyz]{59})'
         matches = re.findall(address_regex, input_text)
         if len(matches) >= 1:
             return matches

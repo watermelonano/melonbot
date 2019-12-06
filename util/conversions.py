@@ -11,7 +11,7 @@ class BananoConversions():
 
 
 class NanoConversions():
-    # 1 NANO = 10e30 RAW
+    # 1 WATERMELONANO = 10e30 RAW
     @staticmethod
     def raw_to_nano(raw_amt: int) -> float:
         return raw_amt / (10 ** 30)

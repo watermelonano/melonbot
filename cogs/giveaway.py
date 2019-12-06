@@ -34,7 +34,7 @@ START_GIVEAWAY_INFO = CommandInfo(
                 f"\n**minimum amount: {config.Config.instance().get_giveaway_minimum()} {Env.currency_symbol()}**" +
                 f"\n**minimum duration: {config.Config.instance().get_giveaway_min_duration()} minutes" +
                 f"\n**maximum duration: {config.Config.instance().get_giveaway_max_duration()} minutes" +
-                f"\n**Example:** `{config.Config.instance().command_prefix}giveaway 10 duration=30 fee=0.05`" + 
+                f"\n**Example:** `{config.Config.instance().command_prefix}giveaway 10 duration=30 fee=0.05`" +
                 f"\nWould start a giveaway of 10 {Env.currency_symbol()} that lasts 30 minutes with a 0.05 {Env.currency_symbol()} fee."
 )
 TICKET_INFO = CommandInfo(
@@ -60,10 +60,10 @@ WINNERS_INFO = CommandInfo(
     details = "View the 10 most recent giveaways winners as well as the amount they've won."
 )
 TIPGIVEAWAY_INFO = CommandInfo(
-    triggers = ["donate", "d"] if Env.banano() else ["ntipgiveaway", "ntg"],
+    triggers = ["donate", "d"] if Env.banano() else ["tipgiveaway", "tg"],
     overview = "Donate to giveaway",
     details = "Donate to the currently active giveaway to increase the pot, or donate to towards starting a giveaway automatically." +
-                f"\nExample: `{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'ntipgiveaway'} 1` - Donate 1 {Env.currency_symbol()} to the current or next giveaway"
+                f"\nExample: `{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'tipgiveaway'} 1` - Donate 1 {Env.currency_symbol()} to the current or next giveaway"
                 f"\nWhen **{config.Config.instance().get_giveaway_auto_minimum()} {Env.currency_symbol()}** is donated, a giveaway will automatically begin."
 )
 
@@ -143,18 +143,18 @@ class GiveawayCog(commands.Cog):
         return True
 
     def format_giveaway_announcement(self, giveaway: Giveaway, amount: int = None) -> discord.Embed:
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name=f"New Giveaway! #{giveaway.id}", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name=f"New Giveaway! #{giveaway.id}", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         embed.description = f"<@{giveaway.started_by.id if not giveaway.started_by_bot else self.bot.user.id}> has sponsored a giveaway of **{Env.raw_to_amount(int(giveaway.base_amount if amount is None else amount))} {Env.currency_name()}**!\n"
         fee = Env.raw_to_amount(int(giveaway.entry_fee))
         if fee > 0:
             embed.description+= f"\nThis giveaway has an entry fee of **{fee} {Env.currency_name()}**"
             embed.description+= f"\n`{config.Config.instance().command_prefix}ticket {fee}` - To enter this giveaway"
-            embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'ntipgiveaway'} <amount>` - To increase the pot"
+            embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'tipgiveaway'} <amount>` - To increase the pot"
         else:
             embed.description+= f"\nThis giveaway is free to enter:"
             embed.description+= f"\n`{config.Config.instance().command_prefix}ticket` - To enter this giveaway"
-            embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'ntipgiveaway'} <amount>` - To increase the pot"            
+            embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'tipgiveaway'} <amount>` - To increase the pot"
         duration = (giveaway.end_at - datetime.datetime.utcnow()).total_seconds()
         if duration < 60:
             embed.description += f"\n\nThis giveaway will end in **{int(duration)} seconds**"
@@ -216,8 +216,8 @@ class GiveawayCog(commands.Cog):
         ann_message+= f"\nThey have been sent **{Env.raw_to_amount(tx_sum)} {Env.currency_symbol()}**"
         if isinstance(giveaway.started_by, User):
             ann_message+= f"\n\nThanks to <@{giveaway.started_by.id}> for sponsoring this giveaway!"
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name="We have a winner!", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name="We have a winner!", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         embed.description = ann_message
 
         for ann in announce_channels:
@@ -297,7 +297,7 @@ class GiveawayCog(commands.Cog):
             elif giveaway_amount < config.Config.instance().get_giveaway_minimum():
                 await Messages.add_x_reaction(msg)
                 await Messages.send_usage_dm(msg.author, START_GIVEAWAY_INFO)
-                return                
+                return
         except AmountMissingException:
             await Messages.add_x_reaction(msg)
             await Messages.send_usage_dm(msg.author, START_GIVEAWAY_INFO)
@@ -404,7 +404,7 @@ class GiveawayCog(commands.Cog):
             paid_already = 0
         else:
             paid_already = int(active_tx.amount)
-    
+
         if paid_already >= int(gw.entry_fee):
             await Messages.send_error_dm(msg.author, "You've already entered this giveaway.")
             await Messages.delete_message_if_ok(msg)
@@ -499,19 +499,19 @@ class GiveawayCog(commands.Cog):
             amount += Env.raw_to_amount(int(tx.amount))
 
         # Format stats message
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name=f"Giveaway #{gw.id}", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name=f"Giveaway #{gw.id}", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         fee = Env.raw_to_amount(int(gw.entry_fee))
         if pending_gw is None:
             embed.description = f"There are **{entries} entries** to win **{NumberUtil.truncate_digits(amount, max_digits=Env.precision_digits())} {Env.currency_symbol()}**\n"
             if fee > 0:
                 embed.description+= f"\nThis giveaway has an entry fee of **{fee} {Env.currency_name()}**"
                 embed.description+= f"\n`{config.Config.instance().command_prefix}ticket {fee}` - To enter this giveaway"
-                embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'ntipgiveaway'} <amount>` - To increase the pot"
+                embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'tipgiveaway'} <amount>` - To increase the pot"
             else:
                 embed.description+= f"\nThis giveaway is free to enter:"
                 embed.description+= f"\n`{config.Config.instance().command_prefix}ticket` - To enter this giveaway"
-                embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'ntipgiveaway'} <amount>` - To increase the pot"            
+                embed.description+= f"\n`{config.Config.instance().command_prefix}{'donate' if Env.banano() else 'tipgiveaway'} <amount>` - To increase the pot"
             duration = (gw.end_at - datetime.datetime.utcnow()).total_seconds()
             if duration < 60:
                 embed.description += f"\n\nThis giveaway will end in **{int(duration)} seconds**"
@@ -586,15 +586,15 @@ class GiveawayCog(commands.Cog):
             adj_rank = str(rank) if rank >= 10 else f" {rank}"
             user_name = winner.winning_user.name
             amount_str = f"{NumberUtil.format_float(Env.raw_to_amount(int(winner.final_amount)))} {Env.currency_symbol()}".ljust(biggest_num)
-            response_msg += f"{adj_rank}. {amount_str} - won by {user_name}\n" 
+            response_msg += f"{adj_rank}. {amount_str} - won by {user_name}\n"
         response_msg += "```"
 
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name=f"Here are the last {len(winners)} giveaway winners \U0001F44F", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name=f"Here are the last {len(winners)} giveaway winners \U0001F44F", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         embed.description = response_msg
 
         if not as_dm:
-            await msg.channel.send(f"<@{msg.author.id}>", embed=embed)    
+            await msg.channel.send(f"<@{msg.author.id}>", embed=embed)
         else:
             await msg.author.send(embed=embed)
             await msg.add_reaction('\u2709')
@@ -705,7 +705,7 @@ class GiveawayCog(commands.Cog):
                     gw,
                     conn=conn
                 )
-    
+
         if gw.end_at is None:
             if not already_entered and Env.raw_to_amount(int(user_tx.amount)) >= config.Config.instance().get_giveaway_auto_fee():
                 await Messages.send_success_dm(msg.author, f"With your generous donation of {Env.raw_to_amount(int(user_tx.amount))} {Env.currency_symbol()} I have reserved your spot for giveaway #{gw.id}!")
@@ -738,7 +738,7 @@ class GiveawayCog(commands.Cog):
                                 except Exception:
                                     pass
                     # Start the timer
-                    asyncio.create_task(self.start_giveaway_timer(gw))                    
+                    asyncio.create_task(self.start_giveaway_timer(gw))
         else:
             if not already_entered and Env.raw_to_amount(int(user_tx.amount)) >= config.Config.instance().get_giveaway_auto_fee():
                 await Messages.send_success_dm(msg.author, f"With your generous donation of {tip_amount} {Env.currency_symbol()} I have entered you into giveaway #{gw.id}!")
@@ -808,8 +808,8 @@ class GiveawayCog(commands.Cog):
                 response+= f"Use `{config.Config.instance().command_prefix}ticket {NumberUtil.format_float(fee_converted - paid_converted)}` to pay the fee and enter"
 
         # Build response
-        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.dark_blue())
-        embed.set_author(name=f"Giveaway #{gw.id} is active!", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/nano_logo.png")
+        embed = discord.Embed(colour=0xFBDD11 if Env.banano() else discord.Colour.green())
+        embed.set_author(name=f"Giveaway #{gw.id} is active!", icon_url="https://github.com/bbedward/Graham_Nano_Tip_Bot/raw/master/assets/banano_logo.png" if Env.banano() else "https://i.imgur.com/7QFgoqT.png")
         embed.description = response
 
         await msg.author.send(embed=embed)

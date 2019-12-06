@@ -63,7 +63,7 @@ COMMANDS = {
             favorites.REMOVE_FAVORITE_INFO,
             favorites.FAVORITES_INFO
         ]
-    },    
+    },
 }
 
 ADMIN_COMMANDS = {
@@ -121,7 +121,7 @@ class HelpCog(commands.Cog):
         """Builds paginated help menu"""
         pages = []
         # Overview
-        author=f"Graham v{__version__} ({'BANANO' if Env.banano() else 'Nano'}) edition"
+        author=f"Graham v{__version__} ({'BANANO' if Env.banano() else 'WATERMELONANO'}) edition"
         title="Command Overview"
         description=("Use `{0}help command` for more information about a specific command " +
                 " or go to the next page").format(config.Config.instance().command_prefix)
@@ -143,7 +143,7 @@ class HelpCog(commands.Cog):
         author=f"Graham v{__version__} for {Env.currency_name()}"
         heart = '\U0001F49B' if Env.banano() else '\U0001F499'
         description = "This bot is completely free, open source, and MIT licnesed"
-        description+= f"\n\nMade with {heart} for the **BANANO** and **NANO** communities"
+        description+= f"\n\nMade with {heart} for the **BANANO** and **WATERMELONANO** communities"
         description+= f"\nHangout with some awesome people at https://chat.banano.cc"
         description+= f"\nMy Discord: **@bbedward#9246**"
         description+= f"\nMy Reddit: **/u/bbedward**"

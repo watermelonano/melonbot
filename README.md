@@ -1,9 +1,9 @@
 
-# Graham - Discord Bot for BANANO and NANO
+# Graham - Discord Bot for BANANO and WATERMELONANO
 
 [![GitHub release (latest)](https://img.shields.io/github/v/release/bbedward/graham_discord_bot)](https://github.com/bbedward/graham_discord_bot/releases) [![License](https://img.shields.io/github/license/bbedward/graham_discord_bot)](https://github.com/bbedward/graham_discord_bot/blob/master/LICENSE) [![Pipeline](https://gitlab.com/appditto/graham_discord_bot/badges/master/pipeline.svg)](https://gitlab.com/appditto/graham_discord_bot/pipelines)
 
-Graham is the most advanced, highest performing discord bot for any cryptocurrency ever. It is built for the [BANANO](https://banano.cc) and [NANO](https://nano.org) cryptocurrencies.  
+Graham is the most advanced, highest performing discord bot for any cryptocurrency ever. It is built for the [BANANO](https://banano.cc) and [WATERMELONANO](https://nano.org) cryptocurrencies.  
 
 The features of this bot include on-chain tipping, rains, favorites, wide-variety of statistics, giveaways, a suite of administration commands, and more.
 
@@ -16,7 +16,7 @@ Because Graham is awesome, with it you can:
 
 ## Where can I see it in action?
 
-Head to the [BANANO Discord](https://chat.banano.cc) - you can see both the NANO and BANANO bots in action just by typing `?help` and `.help`
+Head to the [BANANO Discord](https://chat.banano.cc) - you can see both the WATERMELONANO and BANANO bots in action just by typing `?help` and `.help`
 
 ## How do I add it to my server?
 
@@ -32,7 +32,7 @@ Graham 4.0+ requires the following:
 - Python 3.7+
 - PostgreSQL or SQLite3
 - A Redis Server/Database
-- A NANO or BANANO node - [setting up a node](https://docs.nano.org/running-a-node/node-setup/). You will want to enable RPC and enable_control once your node is up and running. [node configuration](https://docs.nano.org/running-a-node/configuration/)
+- A WATERMELONANO or BANANO node - [setting up a node](https://docs.nano.org/running-a-node/node-setup/). You will want to enable RPC and enable_control once your node is up and running. [node configuration](https://docs.nano.org/running-a-node/configuration/)
 
 It sounds like a lot, but it's actually quite simple.
 

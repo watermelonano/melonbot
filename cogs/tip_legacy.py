@@ -6,7 +6,7 @@ from db.models.user import User
 import config
 
 class TipLegacyCog(commands.Cog):
-    """Just show information about the new tip command for NANO bot"""
+    """Just show information about the new tip command for WATERMELONANO bot"""
     def __init__(self, bot: Bot):
         self.bot = bot
 
@@ -31,5 +31,5 @@ class TipLegacyCog(commands.Cog):
 
         await Messages.send_error_dm(
             member=msg.author,
-            message=f"**WARNING** Tip units are in NANO now! That means tip amounts are **1000000x** larger than they used to be. You need to use `{config.Config.instance().command_prefix}ntip` to send nano tips.\nExample: `{config.Config.instance().command_prefix}ntip 0.00001 @bbedward` - sends 0.00001 NANO to bbedward.\nYou can also use `nrain`, `ntipsplit`, `ntiprandom`, etc."
+            message=f"**WARNING** Tip units are in whole WATERMELONANO!"
         )

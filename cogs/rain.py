@@ -26,10 +26,10 @@ from tasks.transaction_queue import TransactionQueue
 
 # Commands Documentation
 RAIN_INFO = CommandInfo(
-    triggers = ["brain" if Env.banano() else "nrain", "brian", "nrian"],
+    triggers = ["brain" if Env.banano() else "rain"],
     overview = "Distribute a tip amount amongst active users",
     details = "Distribute amount amongst active users." +
-                f"\nExample: `{config.Config.instance().command_prefix}{'b' if Env.banano() else 'n'}rain 1000` will distribute 1000 {Env.currency_symbol()} between everyone who is active." +
+                f"\nExample: `{config.Config.instance().command_prefix}rain 100` will distribute 100 {Env.currency_symbol()} between everyone who is active." +
                 f"\n **minimum amount to rain: {config.Config.instance().get_rain_minimum()} {Env.currency_symbol()}**"
 )
 
@@ -259,4 +259,3 @@ class RainCog(commands.Cog):
 
         # Get only users in our database
         return await User.filter(id__in=users_filtered, frozen=False, tip_banned=False).prefetch_related('account').all()
-

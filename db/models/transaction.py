@@ -114,7 +114,7 @@ class Transaction(Model):
         )
         if resp is not None:
             # Cache the hash in redis to indicate this is an internal transaction
-            # We hope that this process is faster than NANO confirms blocks, because we use this to differentiate internal and external transactions from callback
+            # We hope that this process is faster than WATERMELONANO confirms blocks, because we use this to differentiate internal and external transactions from callback
             await RedisDB.instance().set(f"hash:{resp}", "value", expires=60) # expire after 1 minute
             async with in_transaction() as conn:
                 self.block_hash = resp

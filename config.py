@@ -25,7 +25,7 @@ class Config(object):
                     cls.yaml = yaml.load(in_yaml, Loader=yaml.FullLoader)
             except FileNotFoundError:
                 cls.yaml = None
-            parser = argparse.ArgumentParser(description=f"Graham {'BANANO' if Env.banano() else 'Nano'} Discord Bot v{__version__}")
+            parser = argparse.ArgumentParser(description=f"Graham {'BANANO' if Env.banano() else 'WATERMELONANO'} Discord Bot v{__version__}")
             parser.add_argument('-p', '--prefix', type=str, help='Command prefix for bot commands', default='!')
             parser.add_argument('-l', '--log-file', type=str, help='Log file location', default='/tmp/graham_bot.log')
             parser.add_argument('-s', '--status', type=str, help="The bot's 'playing status'", default=None, required=False)
@@ -68,8 +68,8 @@ class Config(object):
         return default
 
     def get_rain_minimum(self) -> int:
-        # 1000 BAN default or 1 NANO
-        default = 1000 if Env.banano() else 1
+        # 1000 BAN default or 1 WATERMELONANO
+        default = 1000 if Env.banano() else 25
         if not self.has_yaml():
             return default
         elif 'restrictions' in self.yaml and 'rain_minimum' in self.yaml['restrictions']:
@@ -113,7 +113,7 @@ class Config(object):
         return default
 
     def get_giveaway_minimum(self) -> float:
-        default = 1000 if Env.banano() else 0.25
+        default = 1000 if Env.banano() else 5
         if not self.has_yaml():
             return default
         elif 'giveaway' in self.yaml and 'minimum' in self.yaml['giveaway']:
@@ -121,7 +121,7 @@ class Config(object):
         return default
 
     def get_giveaway_auto_minimum(self) -> float:
-        default = 1000 if Env.banano() else 0.25
+        default = 1000 if Env.banano() else 5
         if not self.has_yaml():
             return default
         elif 'giveaway' in self.yaml and 'minimum_auto_start' in self.yaml['giveaway']:
@@ -145,7 +145,7 @@ class Config(object):
         return default
 
     def get_giveaway_auto_fee(self) -> float:
-        default = 10 if Env.banano() else 0.0025
+        default = 10 if Env.banano() else 1
         if not self.has_yaml():
             return default
         elif 'giveaway' in self.yaml and 'auto_fee' in self.yaml['giveaway']:
